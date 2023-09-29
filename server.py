@@ -37,15 +37,23 @@ def callback(ch, method, properties, body):
         print(f"Erro ao processar mensagem: {e}")
 
 # Conectar ao RabbitMQ
-connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost', port=5672))
+try:
+    connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost', port=5672))
+    channel = connection.channel()
 
-channel = connection.channel()
+    # Definir a fila a ser consumida
+    channel.queue_declare(queue='fila_cadastro')
 
-# Definir a fila a ser consumida
-channel.queue_declare(queue='fila_cadastro')
+    # Configurar o callback para receber mensagens
+    channel.basic_consume(queue='fila_cadastro', on_message_callback=callback, auto_ack=True)
 
-# Configurar o callback para receber mensagens
-channel.basic_consume(queue='fila_cadastro', on_message_callback=callback, auto_ack=True)
-
-print('Aguardando mensagens...')
-channel.start_consuming()
+    print('Aguardando mensagens...')
+    channel.start_consuming()
+except pika.exceptions.AMQPError as e:
+    print(f"Erro ao conectar ao RabbitMQ: {e}")
+except Exception as e:
+    print(f"Erro inesperado: {e}")
+finally:
+    # Certifique-se de fechar a conexão, independentemente de ocorrer uma exceção ou não
+    if connection is not None and not connection.is_closed:
+        connection.close()  
