@@ -3,33 +3,37 @@ import psycopg2
 import bcrypt
 
 def cadastrar_usuario(nome, email, telefone, senha, endereco, sexo):
-    # Conectar ao banco de dados PostgreSQL
+    # Conectar ao banco de dados PostgreSQ
     try:
+        if not nome.strip() or not email.strip() or not telefone.strip() or not senha.strip():
+            raise ValueError("Campos obrigatórios em falta")
+        
+        # Resto do código de cadastro aqui
         conn = psycopg2.connect(database="itaxi", user="postgres", password="1234", host="localhost", port="5432")
         cursor = conn.cursor()
-    except psycopg2.Error as e:
-        print(f"Erro ao se conectar com o Banco de Dados: {e}!")
 
-    # Verificar se o usuário já está cadastrado
-    cursor.execute("SELECT * FROM usuarios WHERE email=%s", (email,))
-    usuario = cursor.fetchone()
-
-    if usuario is None:
         # Inserir novo usuário no banco de dados
-        cursor.execute("INSERT INTO usuarios (nome, email, telefone,senha, endereco, sexo) VALUES (%s, %s, %s, %s, %s, %s)",
+        cursor.execute("INSERT INTO usuarios (nome, email, telefone, senha, endereco, sexo) VALUES (%s, %s, %s, %s, %s, %s)",
                        (nome, email, telefone, senha, endereco, sexo))
         conn.commit()
 
         print(f"Usuário {email} cadastrado com sucesso!")
-    else:
-        print(f"Usuário com o Email {email} já está cadastrado.")
+    except ValueError as e:
+        print(f"Erro ao cadastrar usuário: {e}")
 
-    cursor.close()
-    conn.close()
+    except psycopg2.Error as e:
+        print(f"Erro ao conectar ao banco de dados: {e}")
+
+    except Exception as e:
+        print(f"Erro inesperado ao cadastrar usuário: {e}")
+        
+        cursor.close()
+        conn.close()
+
 
 def callback(ch, method, properties, body):
     mensagem = body.decode('utf-8')
-    nome, email, telefone, senha, endereco, sexo= mensagem.split(';')
+    nome, email, telefone, senha, endereco, sexo = mensagem.split(';')
     senha = bcrypt.hashpw(senha.encode('utf-8'), bcrypt.gensalt())
     try:
         cadastrar_usuario(nome, email, telefone, senha, endereco, sexo)
