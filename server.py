@@ -12,12 +12,24 @@ def cadastrar_usuario(nome, email, telefone, senha, endereco, sexo):
         conn = psycopg2.connect(database="itaxi", user="postgres", password="1234", host="localhost", port="5432")
         cursor = conn.cursor()
 
-        # Inserir novo usuário no banco de dados
-        cursor.execute("INSERT INTO usuarios (nome, email, telefone, senha, endereco, sexo) VALUES (%s, %s, %s, %s, %s, %s)",
-                       (nome, email, telefone, senha, endereco, sexo))
-        conn.commit()
+         # Verificar se o usuário já está cadastrado
+        cursor.execute("SELECT * FROM usuarios WHERE cpf=%s", (cpf,))
+        usuario = cursor.fetchone()
 
-        print(f"Usuário {email} cadastrado com sucesso!")
+        if usuario is None:
+            # Inserir novo usuário no banco de dados
+            cursor.execute("INSERT INTO usuarios (nome, email, telefone, senha, endereco, sexo) VALUES (%s, %s, %s, %s, %s, %s)",
+                           (nome, email, telefone, senha, endereco, sexo))
+            conn.commit()
+            
+            print(f"Usuário {email} cadastrado com sucesso!")
+        else:
+            print(f"Usuário com o email {email} já está cadastrado!")
+
+        cursor.close()
+        conn.close()
+
+
     except ValueError as e:
         print(f"Erro ao cadastrar usuário: {e}")
 
@@ -26,9 +38,10 @@ def cadastrar_usuario(nome, email, telefone, senha, endereco, sexo):
 
     except Exception as e:
         print(f"Erro inesperado ao cadastrar usuário: {e}")
-        
-        cursor.close()
-        conn.close()
+
+def cadastro_veiculo(placa, crlv, fotoCNH, corVeiculo, modeloVeiculo, anoVeiculo, renavam, numeroChassi):
+    # Conectar ao banco de dados PostgreSQ
+    pass
 
 
 def callback(ch, method, properties, body):
