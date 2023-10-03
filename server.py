@@ -29,7 +29,6 @@ def cadastrar_usuario(nome, email, telefone, senha, endereco, sexo):
         cursor.close()
         conn.close()
 
-
     except ValueError as e:
         print(f"Erro ao cadastrar usuário: {e}")
 
@@ -38,6 +37,42 @@ def cadastrar_usuario(nome, email, telefone, senha, endereco, sexo):
 
     except Exception as e:
         print(f"Erro inesperado ao cadastrar usuário: {e}")
+
+def cadastrar_veiculo(cnh, renavam, chassi, cor):
+    try:
+        # Verificar se os campos obrigatórios foram preenchidos
+        if not cnh.strip() or not renavam.strip() or not chassi.strip() or not cor.strip():
+            raise ValueError("Campos obrigatórios em falta")
+        
+        # Conectar ao banco de dados PostgreSQ
+        conn = psycopg2.connect(database="itaxi", user="postgres", password="1234", host="localhost", port="5432")
+        cursor = conn.cursor()
+
+         # Verificar se o veículo já está cadastrado, com aquele cnh
+        cursor.execute("SELECT * FROM usuarios WHERE cnh=%s", (cnh,))
+        veiculo = cursor.fetchone()
+
+        if veiculo is None:
+            # Inserir novo veiculo no banco de dados
+            cursor.execute("INSERT INTO veiculos (cnh, renavam, chassi, cor) VALUES (%s, %s, %s, %s)",
+                           (cnh, renavam, chassi, cor))
+            conn.commit()
+            
+            print(f"Veículo {cnh} cadastrado com sucesso!")
+        else:
+            print(f"Veículo com o cnh {cnh} já está cadastrado!")
+
+        cursor.close()
+        conn.close()
+        
+    except ValueError as e:
+        print(f"Erro ao cadastrar este veículo: {e}")
+
+    except psycopg2.Error as e:
+        print(f"Erro ao conectar ao banco de dados: {e}")
+
+    except Exception as e:
+        print(f"Erro inesperado ao cadastrar o veículo: {e}")
 
 def callback(ch, method, properties, body):
     mensagem = body.decode('utf-8')
