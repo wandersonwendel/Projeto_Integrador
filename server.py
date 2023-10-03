@@ -38,10 +38,10 @@ def cadastrar_usuario(nome, email, telefone, senha, endereco, sexo):
     except Exception as e:
         print(f"Erro inesperado ao cadastrar usuário: {e}")
 
-def cadastrar_veiculo(cnh, renavam, chassi, cor):
+def cadastrar_veiculo(placa, crlv, fotoCNH, corVeiculo, modeloVeiculo, anoVeiculo, renavam, numeroChassi):
     try:
         # Verificar se os campos obrigatórios foram preenchidos
-        if not cnh.strip() or not renavam.strip() or not chassi.strip() or not cor.strip():
+        if not placa.strip() or not crlv.strip() or not fotoCNH.strip() or not corVeiculo.strip() or not modeloVeiculo.strip() or not anoVeiculo.strip() or not renavam.strip() or not numeroChassi.strip():
             raise ValueError("Campos obrigatórios em falta")
         
         # Conectar ao banco de dados PostgreSQ
@@ -49,18 +49,18 @@ def cadastrar_veiculo(cnh, renavam, chassi, cor):
         cursor = conn.cursor()
 
          # Verificar se o veículo já está cadastrado, com aquele cnh
-        cursor.execute("SELECT * FROM usuarios WHERE cnh=%s", (cnh,))
+        cursor.execute("SELECT * FROM veiculos WHERE placa=%s", (placa,))
         veiculo = cursor.fetchone()
 
         if veiculo is None:
             # Inserir novo veiculo no banco de dados
-            cursor.execute("INSERT INTO veiculos (cnh, renavam, chassi, cor) VALUES (%s, %s, %s, %s)",
-                           (cnh, renavam, chassi, cor))
+            cursor.execute("INSERT INTO veiculos (cnh, renavam, chassi, cor) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
+                           (placa, crlv, fotoCNH, corVeiculo, modeloVeiculo, anoVeiculo, renavam, numeroChassi))
             conn.commit()
             
-            print(f"Veículo {cnh} cadastrado com sucesso!")
+            print(f"Veículo de placa: {placa} cadastrado com sucesso!")
         else:
-            print(f"Veículo com o cnh {cnh} já está cadastrado!")
+            print(f"Veículo com placa: {placa} já está cadastrado!")
 
         cursor.close()
         conn.close()
@@ -77,9 +77,11 @@ def cadastrar_veiculo(cnh, renavam, chassi, cor):
 def callback(ch, method, properties, body):
     mensagem = body.decode('utf-8')
     nome, email, telefone, senha, endereco, sexo = mensagem.split(';')
+    placa, crlv, fotoCNH, corVeiculo, modeloVeiculo, anoVeiculo, renavam, numeroChassi = mensagem.split(';')
     senha = bcrypt.hashpw(senha.encode('utf-8'), bcrypt.gensalt())
     try:
         cadastrar_usuario(nome, email, telefone, senha, endereco, sexo)
+        cadastrar_veiculo(placa, crlv, fotoCNH, corVeiculo, modeloVeiculo, anoVeiculo, renavam, numeroChassi)
     except Exception as e:
         print(f"Erro ao processar mensagem: {e}")
 
@@ -88,11 +90,13 @@ try:
     connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost', port=5672))
     channel = connection.channel()
 
-    # Definir a fila a ser consumida
+    # Definir as filas a serem consumidas
     channel.queue_declare(queue='fila_cadastro')
+    channel.queue_declare(queue='fila_cadastro_veiculo')
 
-    # Configurar o callback para receber mensagens
+    # Configurar o callback para receber as mensagens
     channel.basic_consume(queue='fila_cadastro', on_message_callback=callback, auto_ack=True)
+    channel.basic_consume(queue='fila_cadastro_veiculo', on_message_callback=callback, auto_ack=True)
 
     print('Aguardando mensagens...')
     channel.start_consuming()
