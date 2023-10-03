@@ -15,4 +15,4 @@ def enviar_mensagem(nome, email, telefone, senha, endereco, sexo):
     connection.close()
 
 # Exemplo de uso
-enviar_mensagem('Wanderson', 'andd@gmail.com', '00972844', 'lllksk', 'ksdhjfuigud', 'senha123')
+enviar_mensagem('Wanderson', 'wandersonsousa489@gmail.com', '00972844', 'lllksk', 'ksdhjfuigud', 'senha123')

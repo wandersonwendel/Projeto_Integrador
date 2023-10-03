@@ -39,11 +39,6 @@ def cadastrar_usuario(nome, email, telefone, senha, endereco, sexo):
     except Exception as e:
         print(f"Erro inesperado ao cadastrar usuário: {e}")
 
-def cadastro_veiculo(placa, crlv, fotoCNH, corVeiculo, modeloVeiculo, anoVeiculo, renavam, numeroChassi):
-    # Conectar ao banco de dados PostgreSQ
-    pass
-
-
 def callback(ch, method, properties, body):
     mensagem = body.decode('utf-8')
     nome, email, telefone, senha, endereco, sexo = mensagem.split(';')
