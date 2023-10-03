@@ -13,7 +13,7 @@ def cadastrar_usuario(nome, email, telefone, senha, endereco, sexo):
         cursor = conn.cursor()
 
          # Verificar se o usuário já está cadastrado
-        cursor.execute("SELECT * FROM usuarios WHERE cpf=%s", (cpf,))
+        cursor.execute("SELECT * FROM usuarios WHERE email=%s", (email,))
         usuario = cursor.fetchone()
 
         if usuario is None:
