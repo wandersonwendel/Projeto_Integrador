@@ -81,56 +81,44 @@ def solicitar_corrida(usuario, origem, destino):
             raise ValueError("Origem e Destino não definidos! Por favor, inserir os campos.")
     except Exception as e:
         print(f"Erro inesperado ao solicitar corrida: {e}")
-
-def iniciar_corrida(motorista):
-    try:
-        # Simular um motorista aceitando a corrida
-        method_frame, header_frame, body = channel.basic_get(queue='iniciar_corrida')
-        if body:
-            print(f'Motorista {motorista} aceitou a corrida: {body}')
-        else:
-            print('Nenhuma corrida disponível.')
-    except Exception as e:
-        print(f"Erro ao iniciar a corrida: {e}")
-    finally:
-        # Fechar a conexão com o RabbitMQ
-        connection.close()
    
-    
-def callback(ch, method, properties, body):
+def callback_cadastrar_usuario(ch, method, properties, body):
     mensagem = body.decode('utf-8')
-    
     nome, email, telefone, senha, endereco, sexo = mensagem.split(';')
     senha = bcrypt.hashpw(senha.encode('utf-8'), bcrypt.gensalt())
 
-    placa, crlv, fotoCNH, corVeiculo, modeloVeiculo, anoVeiculo, renavam, numeroChassi = mensagem.split(';')
-    
-    usuario, origem, destino = mensagem.split(';')
-
-    motorista = mensagem.split(';')
-
     try:
         cadastrar_usuario(nome, email, telefone, senha, endereco, sexo)
+    except Exception as e:
+        print(f"Erro ao processar mensagem: {e}")
+
+def callback_cadastrar_veiculo(ch, method, properties, body):
+    mensagem = body.decode('utf-8')
+    placa, crlv, fotoCNH, corVeiculo, modeloVeiculo, anoVeiculo, renavam, numeroChassi = mensagem.split(';')
+
+    try:
         cadastrar_veiculo(placa, crlv, fotoCNH, corVeiculo, modeloVeiculo, anoVeiculo, renavam, numeroChassi)
+    except Exception as e:
+        print(f"Erro ao processar mensagem: {e}")
+
+def callback_solicitar_corrida(ch, method, properties, body):
+    mensagem = body.decode('utf-8')
+    usuario, origem, destino = mensagem.split(';')
+
+    try:
         solicitar_corrida(usuario, origem, destino)
-        iniciar_corrida(motorista)
     except Exception as e:
         print(f"Erro ao processar mensagem: {e}")
 
 def callback_iniciar_corrida(ch, method, properties, body):
-    #TODO extrair dados do body
     mensagem = body.decode('utf-8')
-    iniciar_corrida(mensagem)
-    
-    return "Corrida iniciada"
+    motorista = mensagem.split(';')
 
+    try:
+        iniciar_corrida(motorista)
+    except Exception as e:
+        print(f"Erro ao processar mensagem: {e}")
 
-def callback_solicitar_corrida(ch, method, properties, body):
-    mensagem = body.decode('utf-8')
-    print(mensagem)
-    dados = mensagem.split(";")
-    solicitar_corrida(dados[0], dados[1], dados[2])
-    return "Corrida solicitada com sucesso"
 # Conectar ao RabbitMQ
 try:
     connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost', port=5672))
@@ -143,8 +131,8 @@ try:
     channel.queue_declare(queue='fila_iniciar_corrida')
 
     # Configurar o callback para receber as mensagens
-    channel.basic_consume(queue='fila_cadastro', on_message_callback=callback, auto_ack=True)
-    channel.basic_consume(queue='fila_cadastro_veiculo', on_message_callback=callback, auto_ack=True)
+    channel.basic_consume(queue='fila_cadastro', on_message_callback=callback_cadastrar_usuario, auto_ack=True)
+    channel.basic_consume(queue='fila_cadastro_veiculo', on_message_callback=callback_cadastrar_veiculo, auto_ack=True)
     channel.basic_consume(queue='fila_solicitar_corrida', on_message_callback=callback_solicitar_corrida, auto_ack=True)
     channel.basic_consume(queue='fila_iniciar_corrida', on_message_callback=callback_iniciar_corrida, auto_ack=True)
 
