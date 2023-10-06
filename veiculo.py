@@ -5,7 +5,7 @@ def enviar_mensagem(placa, crlv, fotoCNH, corVeiculo, modeloVeiculo, anoVeiculo,
 
     # Conectar ao RabbitMQ
     connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost', port=5672))
-    channel = connection.channel()
+    channel = connection.channel() 
 
     # Publicar a mensagem na fila
     channel.basic_publish(exchange='', routing_key='fila_cadastro_veiculo', body=mensagem)
