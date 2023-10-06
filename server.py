@@ -81,7 +81,18 @@ def solicitar_corrida(usuario, origem, destino):
             raise ValueError("Origem e Destino não definidos! Por favor, inserir os campos.")
     except Exception as e:
         print(f"Erro inesperado ao solicitar corrida: {e}")
-   
+
+def iniciar_corrida(usuario, motorista)   :
+    corrida_em_andamento = None
+
+    if corrida_em_andamento is not None:
+        print("Já existe uma corrida em andamento.")
+    else:
+        corrida_em_andamento = {"passageiro": usuario, "motorista": motorista}
+        print("f'A corrida foi iniciada. Passageiro: {usuario}, Motorista: {motorista}'")
+
+
+
 def callback_cadastrar_usuario(ch, method, properties, body):
     mensagem = body.decode('utf-8')
     nome, email, telefone, senha, endereco, sexo = mensagem.split(';')
