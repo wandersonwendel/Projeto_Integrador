@@ -9,7 +9,7 @@ def cadastrar_usuario(nome, email, telefone, senha, endereco, sexo):
             raise ValueError("Campos obrigatórios em falta")
         
         # Resto do código de cadastro aqui
-        conn = psycopg2.connect(database="itaxi", user="postgres", password="1234", host="localhost", port="5432")
+        conn = psycopg2.connect(database="ITAxi", user="postgres", password="bditaxi", host="localhost", port="5432")
         cursor = conn.cursor()
 
          # Verificar se o usuário já está cadastrado
@@ -90,7 +90,6 @@ def iniciar_corrida(usuario, motorista)   :
     else:
         corrida_em_andamento = {"passageiro": usuario, "motorista": motorista}
         print("f'A corrida foi iniciada. Passageiro: {usuario}, Motorista: {motorista}'")
-
 
 
 def callback_cadastrar_usuario(ch, method, properties, body):
