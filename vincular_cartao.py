@@ -1,6 +1,6 @@
 import pika
 
-def enviar_vinculacao(email, numero_cartao, nome_titular, data_validade, codigo_seguranca):
+def vincular_cartao(email, numero_cartao, nome_titular, data_validade, codigo_seguranca):
     mensagem = f"{email};{numero_cartao};{nome_titular};{data_validade};{codigo_seguranca}"
 
     # Conectar ao RabbitMQ
@@ -15,4 +15,4 @@ def enviar_vinculacao(email, numero_cartao, nome_titular, data_validade, codigo_
     connection.close()
 
 # Exemplos de uso
-enviar_vinculacao('joao@email.com', '1234567890123456', 'João Silva', '12/23', '123')
+vincular_cartao('joao@email.com', '1234567890123456', 'João Silva', '12/23', '123')
