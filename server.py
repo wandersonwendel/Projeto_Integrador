@@ -15,7 +15,7 @@ def cadastrar_usuario(nome, email, telefone, senha, endereco, sexo):
             raise ValueError("Os campos obrigatórios -> ( * ) não foram preenchidos!")
         
         # Conectar ao banco de dados PostgreSQ
-        conn = psycopg2.connect(database="itaxi", user="postgres", password="1234", host="localhost", port="5432")
+        conn = psycopg2.connect(database="itaxidb", user="postgres", password="bditaxi", host="localhost", port="5432")
         cursor = conn.cursor()
 
          # Verificar se o usuário já está cadastrado
@@ -140,62 +140,17 @@ def solicitar_corrida(email, endereco_partida, endereco_destino):
     except Exception as e:
         print(f"Erro inesperado ao solicitar corrida: {e}")
 
-def vincular_cartao(email, numero_cartao, nome_titular, data_validade, cvv):
-    try:
-        conn = psycopg2.connect(database="itaxi", user="postgres", password="1234", host="192.168.3.6", port="5432")
-        cursor = conn.cursor()
+def iniciar_corrida(usuario, motorista)   :
+    corrida_em_andamento = None
 
-        # Verificar se o usuário existe no banco de dados
-        cursor.execute("SELECT * FROM usuarios WHERE email=%s", (email,))
-        usuario = cursor.fetchone()
+    if corrida_em_andamento is not None:
+        print("Já existe uma corrida em andamento.")
+    else:
+        corrida_em_andamento = {"passageiro": usuario, "motorista": motorista}
+        print("f'A corrida foi iniciada. Passageiro: {usuario}, Motorista: {motorista}'")
 
-        if usuario:
-            # Inserir os detalhes do cartão no banco de dados do usuário
-            cursor.execute("INSERT INTO cartoes (usuario_email, numero_cartao, nome_titular, data_validade, codigo_seguranca) VALUES (%s, %s, %s, %s, %s)",
-                           (email, numero_cartao, nome_titular, data_validade, cvv))
-            conn.commit()
 
-            print("Cartão vinculado com sucesso.")
-        else:
-            print("Usuário não encontrado.")
 
-        cursor.close()
-        conn.close()
-
-    except psycopg2.Error as e:
-        print(f"Erro ao conectar ao banco de dados: {e}")
-
-    except Exception as e:
-        print(f"Erro inesperado ao vincular o cartão: {e}")
-
-def desvincular_cartao(email, numero_cartao):
-    try:
-        conn = psycopg2.connect(database="itaxi", user="postgres", password="1234", host="192.168.3.6", port="5432")
-        cursor = conn.cursor()
-
-        # Verificar se o usuário possui o cartão no banco de dados
-        cursor.execute("SELECT * FROM cartoes WHERE usuario_email=%s AND numero_cartao=%s", (email, numero_cartao))
-        cartao = cursor.fetchone()
-
-        if cartao:
-            # Remover o cartão do banco de dados
-            cursor.execute("DELETE FROM cartoes WHERE usuario_email=%s AND numero_cartao=%s", (email, numero_cartao))
-            conn.commit()
-
-            print("Cartão desvinculado com sucesso.")
-        else:
-            print("Cartão não encontrado para este usuário.")
-
-        cursor.close()
-        conn.close()
-
-    except psycopg2.Error as e:
-        print(f"Erro ao conectar ao banco de dados: {e}")
-
-    except Exception as e:
-        print(f"Erro inesperado ao desvincular o cartão: {e}")
-
-# Definindo as callbacks
 def callback_cadastrar_usuario(ch, method, properties, body):
     mensagem = body.decode('utf-8')
     nome, email, telefone, senha, endereco, sexo = mensagem.split(';')
