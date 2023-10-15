@@ -249,7 +249,7 @@ def callback_desvincular_cartao(ch, method, properties, body):
     try:
         desvincular_cartao(email, numero_cartao)
     except Exception as e:
-        print(f"Erro ao processar mensagem: {e}")
+        print(f"Erro ao processar mensagem: {e}") 
 
 
 # Conectar ao RabbitMQ

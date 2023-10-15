@@ -5,7 +5,7 @@ def cadastrar_usuario(nome, email, telefone, senha, endereco, sexo):
 
     # Conectar ao RabbitMQ
     connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost', port=5672))
-    channel = connection.channel()
+    channel = connection.channel() 
 
     # Publicar a mensagem na fila
     channel.basic_publish(exchange='', routing_key='fila_cadastro', body=mensagem)

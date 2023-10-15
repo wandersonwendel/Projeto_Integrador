@@ -5,7 +5,7 @@ def solicitar_autorizacao(email, aceita_permissao):
     mensagem = f"{email};{aceita_permissao}"
 
     if aceita_permissao.lower() == "sim":
-        print(f'Mensagem enviada: {mensagem}')
+        print(f'Mensagem enviada: {mensagem}') 
         g = geocoder.ip('me')
         localizacao = g.latlng  # Isso irá retornar uma tupla com a latitude e longitude
         

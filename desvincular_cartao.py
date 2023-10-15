@@ -5,7 +5,7 @@ def enviar_desvinculacao(email, numero_cartao):
 
     # Conectar ao RabbitMQ
     connection = pika.BlockingConnection(pika.ConnectionParameters(host='192.168.3.6', port=5672))
-    channel = connection.channel()
+    channel = connection.channel() 
 
     # Publicar a mensagem na fila
     channel.basic_publish(exchange='', routing_key='fila_desvincular_cartao', body=mensagem)
