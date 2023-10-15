@@ -111,7 +111,7 @@ def cadastrar_veiculo(placa, crlv, fotoCNH, corVeiculo, modeloVeiculo, anoVeicul
 
 def solicitar_corrida(email, endereco_partida, endereco_destino):
     try:
-        # Conectar ao banco de dados PostgreSQL
+        # Conectar ao banco de dados
         conn = psycopg2.connect(database="itaxi", user="postgres", password="1234", host="localhost", port="5432")
         cursor = conn.cursor()
 
