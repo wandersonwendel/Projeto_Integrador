@@ -15,7 +15,7 @@ def solicitar_corrida(email, endereco_partida, endereco_destino):
     valor_da_corrida = 5.0
     print(f"Valor da corrida: R${valor_da_corrida}")
 
-    solicitar_corrida = input("Solicitar corida: 1(Sim), 2(Não)")
+    solicitar_corrida = int(input("Solicitar corida: 1(Sim), 2(Não)"))
     if solicitar_corrida == 1:
         print("Corrida solicitada. Seu motorista irá chegar em breve!")
     elif solicitar_corrida == 2:
