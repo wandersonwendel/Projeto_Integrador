@@ -1,7 +1,5 @@
 import pika
 
-import pika
-
 def solicitar_corrida(email, endereco_partida, endereco_destino):
     mensagem = f"{email};{endereco_partida};{endereco_destino}"
 
