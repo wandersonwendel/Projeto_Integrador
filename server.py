@@ -124,7 +124,6 @@ def cadastrar_veiculo(placa, crlv, fotoCNH, corVeiculo, modeloVeiculo, anoVeicul
         if veiculo is None:
             # Inserir novo veiculo no banco de dados
             cursor.execute("INSERT INTO veiculos (placa, crlv, fotoCNH, corVeiculo, modeloVeiculo, anoVeiculo, renavam, numeroChassi) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
-            cursor.execute("INSERT INTO veiculos (placa, crlv, fotoCNH, corVeiculo, modeloVeiculo, anoVeiculo, renavam, numeroChassi) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
                            (placa, crlv, fotoCNH, corVeiculo, modeloVeiculo, anoVeiculo, renavam, numeroChassi))
             conn.commit()
             
@@ -185,7 +184,6 @@ def vincular_cartao(email, numero_cartao, nome_titular, data_validade, cvv):
 
         if usuario:
             # Inserir os detalhes do cartão no banco de dados do usuário
-            cursor.execute("INSERT INTO cartoes (email, numero_cartao, nome_titular, data_validade, cvv) VALUES (%s, %s, %s, %s, %s)",
             cursor.execute("INSERT INTO cartoes (email, numero_cartao, nome_titular, data_validade, cvv) VALUES (%s, %s, %s, %s, %s)",
                            (email, numero_cartao, nome_titular, data_validade, cvv))
             conn.commit()
