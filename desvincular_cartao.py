@@ -15,4 +15,4 @@ def enviar_desvinculacao(email, numero_cartao):
     connection.close()
 
 # Para desvincular um cartão
-enviar_desvinculacao('joao@email.com', '1234567890123456')
+enviar_desvinculacao('wandersonsousa489@mail.com', '1234567890123456')
