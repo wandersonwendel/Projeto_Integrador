@@ -109,7 +109,7 @@ def cadastrar_veiculo(placa, crlv, fotoCNH, corVeiculo, modeloVeiculo, anoVeicul
     except Exception as e:
         print(f"Erro inesperado ao cadastrar o veículo: {e}")
 
-def solicitar_corrida(email, endereco_partida, endereco_destino):
+def solicitar_corrida(email, endereco, endereco_destino):
     try:
         # Conectar ao banco de dados PostgreSQL
         conn = psycopg2.connect(database="itaxi", user="postgres", password="1234", host="localhost", port="5432")
@@ -118,18 +118,12 @@ def solicitar_corrida(email, endereco_partida, endereco_destino):
         # Verificar se o usuário está devidamente logado no sistema
         cursor.execute("SELECT * FROM usuarios WHERE email=%s", (email,))
         usuario = cursor.fetchone()
-        if usuario is None:
-            print("Usuário não está logado. Por favor, faça o login antes de solicitar uma corrida.")
-        else:
-            return usuario
 
-        # Verificar se os endereços de partida e destino são válidos
-        cursor.execute("SELECT * FROM enderecos WHERE endereco_partida=%s AND endereco_destino=%s", (endereco_partida, endereco_destino,))
-        endereco = cursor.fetchone()
+        valor_corrida = 5.00
         if endereco is None:
-            print("Endereço não encontrado. Por favor, insira um endereço válido.")
+            print("Endereço de origem {endereco} não cadastrado no banco de dados!")
         else:
-            return endereco_partida, endereco_destino
+            print(f"Corrida solicitada! Origem: {endereco}, Destino: {endereco_destino}. Valor da corrida: R${valor_corrida}")        
 
         cursor.close()
         conn.close()
@@ -217,10 +211,10 @@ def callback_cadastrar_veiculo(ch, method, properties, body):
 
 def callback_solicitar_corrida(ch, method, properties, body):
     mensagem = body.decode('utf-8')
-    email, endereco_partida, endereco_destino = mensagem.split(';')
+    email, endereco, endereco_destino = mensagem.split(';')
 
     try:
-        solicitar_corrida(email, endereco_partida, endereco_destino)
+        solicitar_corrida(email, endereco, endereco_destino)
     except Exception as e:
         print(f"Erro ao processar mensagem: {e}")
 
