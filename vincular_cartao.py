@@ -1,7 +1,7 @@
 import pika
 
-def vincular_cartao(email, numero_cartao, nome_titular, data_validade, codigo_seguranca):
-    mensagem = f"{email};{numero_cartao};{nome_titular};{data_validade};{codigo_seguranca}"
+def vincular_cartao(email, numero_cartao, nome_titular, data_validade, cvv):
+    mensagem = f"{email};{numero_cartao};{nome_titular};{data_validade};{cvv}"
 
     # Conectar ao RabbitMQ
     connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost', port=5672))
@@ -15,4 +15,4 @@ def vincular_cartao(email, numero_cartao, nome_titular, data_validade, codigo_se
     connection.close()
 
 # Exemplos de uso
-vincular_cartao('joao@email.com', '1234567890123456', 'João Silva', '12/23', '123')
+vincular_cartao('wandersonsousa489@gmail.com', '1234567890123456', 'Wanderson', '12/23', '123')

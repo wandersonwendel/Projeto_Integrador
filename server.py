@@ -124,6 +124,7 @@ def cadastrar_veiculo(placa, crlv, fotoCNH, corVeiculo, modeloVeiculo, anoVeicul
         if veiculo is None:
             # Inserir novo veiculo no banco de dados
             cursor.execute("INSERT INTO veiculos (placa, crlv, fotoCNH, corVeiculo, modeloVeiculo, anoVeiculo, renavam, numeroChassi) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
+            cursor.execute("INSERT INTO veiculos (placa, crlv, fotoCNH, corVeiculo, modeloVeiculo, anoVeiculo, renavam, numeroChassi) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
                            (placa, crlv, fotoCNH, corVeiculo, modeloVeiculo, anoVeiculo, renavam, numeroChassi))
             conn.commit()
             
@@ -175,7 +176,7 @@ def solicitar_corrida(email, endereco, endereco_destino):
 
 def vincular_cartao(email, numero_cartao, nome_titular, data_validade, cvv):
     try:
-        conn = psycopg2.connect(database="itaxi", user="postgres", password="1234", host="192.168.3.6", port="5432")
+        conn = psycopg2.connect(database="itaxi", user="postgres", password="1234", host="localhost", port="5432")
         cursor = conn.cursor()
 
         # Verificar se o usuário existe no banco de dados
@@ -184,6 +185,7 @@ def vincular_cartao(email, numero_cartao, nome_titular, data_validade, cvv):
 
         if usuario:
             # Inserir os detalhes do cartão no banco de dados do usuário
+            cursor.execute("INSERT INTO cartoes (email, numero_cartao, nome_titular, data_validade, cvv) VALUES (%s, %s, %s, %s, %s)",
             cursor.execute("INSERT INTO cartoes (email, numero_cartao, nome_titular, data_validade, cvv) VALUES (%s, %s, %s, %s, %s)",
                            (email, numero_cartao, nome_titular, data_validade, cvv))
             conn.commit()
@@ -203,7 +205,7 @@ def vincular_cartao(email, numero_cartao, nome_titular, data_validade, cvv):
 
 def desvincular_cartao(email, numero_cartao):
     try:
-        conn = psycopg2.connect(database="itaxi", user="postgres", password="1234", host="192.168.3.6", port="5432")
+        conn = psycopg2.connect(database="itaxi", user="postgres", password="1234", host="localhost", port="5432")
         cursor = conn.cursor()
 
         # Verificar se o usuário possui o cartão no banco de dados
