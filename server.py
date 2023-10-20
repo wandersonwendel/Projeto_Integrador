@@ -3,14 +3,15 @@ import psycopg2
 import bcrypt
 import geocoder
 
-def cadastrar_usuario(nome, email, telefone, senha, endereco, sexo):
-    # Conectar ao banco de dados PostgreSQ
+def cadastrar_passageiro(nome, email, telefone, senha, endereco, sexo):
+    # Conectar ao banco de dados
+
     try:
         if not nome.strip() or not email.strip() or not telefone.strip() or not senha.strip():
             raise ValueError("Campos obrigatórios em falta")
         
         # Conectar ao banco de dados
-        conn = psycopg2.connect(database="itaxi", user="postgres", password="1234", host="192.168.3.6", port="5432")
+        conn = psycopg2.connect(database="itaxi", user="postgres", password="1234", host="localhost", port="5432")
         cursor = conn.cursor()
 
          # Verificar se o usuário já está cadastrado
@@ -39,23 +40,64 @@ def cadastrar_usuario(nome, email, telefone, senha, endereco, sexo):
     except Exception as e:
         print(f"Erro inesperado ao cadastrar usuário: {e}")
 
+def cadastrar_mototaxi(nome, email, telefone, senha, endereco, sexo):
+    # Conectar ao banco de dados
+    try:
+        if not nome.strip() or not email.strip() or not telefone.strip() or not senha.strip():
+            raise ValueError("Campos obrigatórios em falta")
+        
+        # Conectar ao banco de dados
+        conn = psycopg2.connect(database="itaxi", user="postgres", password="1234", host="localhost", port="5432")
+        cursor = conn.cursor()
+
+         # Verificar se o usuário já está cadastrado
+        cursor.execute("SELECT * FROM mototaxistas WHERE email=%s", (email,))
+        mototaxi = cursor.fetchone()
+
+        if mototaxi is None:
+            # Inserir novo usuário no banco de dados
+            cursor.execute("INSERT INTO mototaxistas (nome, email, telefone, senha, endereco, sexo) VALUES (%s, %s, %s, %s, %s, %s)",
+                           (nome, email, telefone, senha, endereco, sexo))
+            conn.commit()
+            
+            print(f"Mototaxi {email} cadastrado com sucesso!")
+        else:
+            print(f"Mototaxi com o email {email} já está cadastrado!")
+
+        cursor.close()
+        conn.close()
+
+    except ValueError as e:
+        print(f"Erro ao cadastrar mototaxi: {e}")
+
+    except psycopg2.Error as e:
+        print(f"Erro ao conectar ao banco de dados: {e}")
+
+    except Exception as e:
+        print(f"Erro inesperado ao cadastrar mototaxi: {e}")
+
 def login(email, senha):
     try:
         if not email.strip() or not senha.strip():
             raise ValueError("Campos obrigatórios em falta")
         
         # Resto do código de cadastro aqui
-        conn = psycopg2.connect(database="itaxi", user="postgres", password="1234", host="192.168.3.6", port="5432")
+        conn = psycopg2.connect(database="itaxi", user="postgres", password="1234", host="localhost", port="5432")
         cursor = conn.cursor()
 
          # Verificar se o usuário já está cadastrado
-        cursor.execute("SELECT * FROM usuarios WHERE email=%s", (email,))
-        usuario = cursor.fetchone()
+        cursor.execute("SELECT * FROM usuarios OR mototaxistas WHERE email=%s AND senha=%s", (email, senha,))
+        usuario, mototaxi = cursor.fetchone()
 
         if usuario is None:
             print(f"Usuário {email} inexistente.")
         else:
             print(f"Usuário {email} logado com sucesso!")
+
+        if mototaxi is None:
+            print(f"Mototaxi {email} inexistente.")
+        else:
+            print(f"Mototaxi {email} logado com sucesso!")
 
         cursor.close()
         conn.close()
@@ -69,11 +111,10 @@ def login(email, senha):
     except Exception as e:
         print(f"Erro inesperado ao validar usuário: {e}")
 
-
 def autorizar_localizacao(email, aceita_permissao):
     try:
         # Conectar ao banco de dados PostgreSQL
-        conn = psycopg2.connect(database="itaxi", user="postgres", password="1234", host="192.168.3.6", port="5432")
+        conn = psycopg2.connect(database="itaxi", user="postgres", password="1234", host="localhost", port="5432")
         cursor = conn.cursor()
 
         # Verificar se o usuário está devidamente logado no sistema
@@ -106,7 +147,6 @@ def autorizar_localizacao(email, aceita_permissao):
     except Exception as e:
         print(f"Erro inesperado ao autorizar localização: {e}")
 
-
 def cadastrar_veiculo(placa, crlv, fotoCNH, corVeiculo, modeloVeiculo, anoVeiculo, renavam, numeroChassi):
     try:
         # Verificar se os campos obrigatórios foram preenchidos
@@ -114,7 +154,7 @@ def cadastrar_veiculo(placa, crlv, fotoCNH, corVeiculo, modeloVeiculo, anoVeicul
             raise ValueError("Campos obrigatórios em falta")
         
         # Conectar ao banco de dados
-        conn = psycopg2.connect(database="itaxi", user="postgres", password="1234", host="192.168.3.6", port="5432")
+        conn = psycopg2.connect(database="itaxi", user="postgres", password="1234", host="localhost", port="5432")
         cursor = conn.cursor()
 
          # Verificar se o veículo já está cadastrado, com aquela placa
@@ -146,7 +186,7 @@ def cadastrar_veiculo(placa, crlv, fotoCNH, corVeiculo, modeloVeiculo, anoVeicul
 def solicitar_corrida(email, endereco, endereco_destino):
     try:
         # Conectar ao banco de dados
-        conn = psycopg2.connect(database="itaxi", user="postgres", password="1234", host="192.168.3.6", port="5432")
+        conn = psycopg2.connect(database="itaxi", user="postgres", password="1234", host="localhost", port="5432")
         cursor = conn.cursor()
 
          # Verificar se o usuário já está cadastrado
@@ -171,7 +211,6 @@ def solicitar_corrida(email, endereco, endereco_destino):
 
     except Exception as e:
         print(f"Erro inesperado ao validar usuário: {e}")
-
 
 def vincular_cartao(email, numero_cartao, nome_titular, data_validade, cvv):
     try:
@@ -230,13 +269,13 @@ def desvincular_cartao(email, numero_cartao):
 
 
 
-def callback_cadastrar_usuario(ch, method, properties, body):
+def callback_cadastrar_passageiro(ch, method, properties, body):
     mensagem = body.decode('utf-8')
     nome, email, telefone, senha, endereco, sexo = mensagem.split(';')
     senha = bcrypt.hashpw(senha.encode('utf-8'), bcrypt.gensalt())
 
     try:
-        cadastrar_usuario(nome, email, telefone, senha, endereco, sexo)
+        cadastrar_passageiro(nome, email, telefone, senha, endereco, sexo)
     except Exception as e:
         print(f"Erro ao processar mensagem: {e}")
 
@@ -297,11 +336,11 @@ def callback_desvincular_cartao(ch, method, properties, body):
 
 # Conectar ao RabbitMQ
 try:
-    connection = pika.BlockingConnection(pika.ConnectionParameters(host='192.168.3.6', port=5672))
+    connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost', port=5672))
     channel = connection.channel()
 
     # Definir as filas a serem consumidas
-    channel.queue_declare(queue='fila_cadastro')
+    channel.queue_declare(queue='fila_cadastrar_passageiro')
     channel.queue_declare(queue='fila_cadastro_veiculo')
     channel.queue_declare(queue='fila_login')
     channel.queue_declare(queue='fila_solicitar_corrida')
@@ -310,7 +349,7 @@ try:
     channel.queue_declare(queue='fila_desvincular_cartao')
 
     # Configurar o callback para receber as mensagens
-    channel.basic_consume(queue='fila_cadastro', on_message_callback=callback_cadastrar_usuario, auto_ack=True)
+    channel.basic_consume(queue='fila_cadastrar_passageiro', on_message_callback=callback_cadastrar_passageiro, auto_ack=True)
     channel.basic_consume(queue='fila_cadastro_veiculo', on_message_callback=callback_cadastrar_veiculo, auto_ack=True)
     channel.basic_consume(queue='fila_login', on_message_callback=callback_login, auto_ack=True)
     channel.basic_consume(queue='fila_solicitar_corrida', on_message_callback=callback_solicitar_corrida, auto_ack=True)
