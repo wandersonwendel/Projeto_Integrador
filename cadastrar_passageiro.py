@@ -8,7 +8,7 @@ def cadastrar_usuario(nome, email, telefone, senha, endereco, sexo):
     channel = connection.channel() 
 
     # Publicar a mensagem na fila
-    channel.basic_publish(exchange='', routing_key='fila_cadastro', body=mensagem)
+    channel.basic_publish(exchange='', routing_key='fila_cadastrar_passageiro', body=mensagem)
 
     print(f'Mensagem enviada: {mensagem}')
 
