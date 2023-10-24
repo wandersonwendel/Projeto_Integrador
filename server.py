@@ -300,6 +300,43 @@ def iniciar_corrida(email, mototaxi, corrida_aceita, localizacao_atual, origem, 
     except Exception as e:
         print(f"Erro inesperado ao iniciar a corrida: {e}")
 
+def excluir_conta(email, senha):
+    try:
+        if not email.strip() or not senha.strip():
+            raise ValueError("Campos obrigatórios em falta")
+
+        # Conectar ao banco de dados
+        conn = psycopg2.connect(database="itaxi", user="postgres", password="1234", host="localhost", port="5432")
+        cursor = conn.cursor()
+
+        # Verificar se o usuário existe e se a senha está correta
+        cursor.execute("SELECT * FROM usuarios WHERE email=%s", (email,))
+        usuario = cursor.fetchone()
+
+        if usuario:
+            # Verificar se a senha corresponde
+            stored_hashed_password = usuario[3]  # Supondo que a senha esteja na terceira coluna da tabela
+            if bcrypt.checkpw(senha.encode('utf-8'), stored_hashed_password):
+                # Excluir a conta do usuário
+                cursor.execute("DELETE FROM usuarios WHERE email=%s", (email,))
+                conn.commit()
+                print(f"Conta do usuário {email} excluída com sucesso!")
+            else:
+                print("Senha incorreta. A conta não foi excluída.")
+        else:
+            print("Usuário não encontrado. A conta não foi excluída.")
+
+        cursor.close()
+        conn.close()
+
+    except ValueError as e:
+        print(f"Erro ao excluir conta: {e}")
+
+    except psycopg2.Error as e:
+        print(f"Erro ao conectar ao banco de dados: {e}")
+
+    except Exception as e:
+        print(f"Erro inesperado ao excluir conta: {e}")
 
 def callback_cadastrar_passageiro(ch, method, properties, body):
     mensagem = body.decode('utf-8')
@@ -376,6 +413,15 @@ def callback_iniciar_corrida(ch, method, properties, body):
     except Exception as e:
         print(f"Erro ao processar mensagem: {e}")
 
+def callback_excluir_conta(ch, method, properties, body):
+    mensagem = body.decode('utf-8')
+    email, senha = mensagem.split(';')
+
+    try:
+        excluir_conta(email, senha)
+    except Exception as e:
+        print(f"Erro ao processar mensagem de exclusão de conta: {e}")
+        
 # Conectar ao RabbitMQ
 try:
     connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost', port=5672))
