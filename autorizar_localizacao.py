@@ -1,4 +1,3 @@
-import geocoder
 import pika
 
 def solicitar_autorizacao(email, aceita_permissao):

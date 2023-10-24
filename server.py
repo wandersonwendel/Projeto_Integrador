@@ -266,9 +266,6 @@ def desvincular_cartao(email, numero_cartao):
 
     except Exception as e:
         print(f"Erro inesperado ao desvincular o cartão: {e}")
-
-
-
 def callback_cadastrar_passageiro(ch, method, properties, body):
     mensagem = body.decode('utf-8')
     nome, email, telefone, senha, endereco, sexo = mensagem.split(';')
