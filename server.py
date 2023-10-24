@@ -41,7 +41,7 @@ def cadastrar_passageiro(nome, email, telefone, senha, endereco, sexo):
         print(f"Erro inesperado ao cadastrar usuário: {e}")
 
 def cadastrar_mototaxi(nome, email, telefone, senha, endereco, sexo):
-    # Conectar ao banco de dados
+    # Conectar ao banco de dados 
     try:
         if not nome.strip() or not email.strip() or not telefone.strip() or not senha.strip():
             raise ValueError("Campos obrigatórios em falta")
