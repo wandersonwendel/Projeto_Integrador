@@ -269,26 +269,22 @@ def desvincular_cartao(email, numero_cartao):
 
 def iniciar_corrida(email, mototaxi, corrida_aceita, localizacao_atual, origem, destino):
     try:
-        # Conectar ao banco de dados
+        #Conectar ao Banco de Dados
         conn = psycopg2.connect(database="itaxi", user="postgres", password="1234", host="localhost", port="5432")
         cursor = conn.cursor()
 
-        # Verificar se o usuário já está cadastrado
-        cursor.execute("SELECT * FROM mototaxistas WHERE email=%s", (email, ))
+        # Verificar se o usuário existe no banco de dados
+        cursor.execute("SELECT * FROM usuarios WHERE email=%s", (email,))
         mototaxi = cursor.fetchone()
 
         if not mototaxi:
             raise ValueError("Motorista não identificado. Faça o login antes de iniciar a corrida.")
-        
-
         if not corrida_aceita:
             raise ValueError("Você precisa aceitar uma corrida antes de iniciar.")
         if localizacao_atual != origem:
             raise ValueError("Você não está no local de origem do passageiro.")
 
         # Lógica para iniciar a corrida
-
-
         print(f"Iniciando a corrida para o destino {destino}.")
 
         cursor.close()
@@ -299,6 +295,7 @@ def iniciar_corrida(email, mototaxi, corrida_aceita, localizacao_atual, origem, 
 
     except Exception as e:
         print(f"Erro inesperado ao iniciar a corrida: {e}")
+
 
 def excluir_conta(email, senha):
     try:
@@ -406,12 +403,29 @@ def callback_desvincular_cartao(ch, method, properties, body):
 def callback_iniciar_corrida(ch, method, properties, body):
     # Processar a mensagem recebida e extrair os detalhes necessários
     message = body.decode('utf-8')
-    email, mototaxi, corrida_aceita, localizacao_atual, origem, destino = message.split(';')
+    dados = message.split(';')
 
+    if dados[0] == "SOLICITACAO":
+        cliente_id = int(partes[1])
+        entregador_id = int(partes[2])
+
+        # Simulação: Verificar se o entregador está disponível
+        entregador_disponivel = True  # Simulação
+        if entregador_disponivel:
+            # Simulação: Perguntar se o entregador aceita a solicitação
+            resposta = input("Você aceita a solicitação de entrega? (s/n): ")
+            if resposta.lower() == 's':
+                enviar_resposta_para_cliente(cliente_id, "ACEITO")
+            else:
+                enviar_resposta_para_cliente(cliente_id, "RECUSADO")
+        else:
+            print("Não há entregadores disponíveis no momento.")
+
+    """ email, mototaxi, corrida_aceita, localizacao_atual, origem, destino = message.split(';')
     try:
-        desvincular_cartao(email, mototaxi, corrida_aceita, localizacao_atual, origem, destino)
+        iniciar_corrida(email, mototaxi, corrida_aceita, localizacao_atual, origem, destino)
     except Exception as e:
-        print(f"Erro ao processar mensagem: {e}")
+        print(f"Erro ao processar mensagem: {e}") """
 
 def callback_excluir_conta(ch, method, properties, body):
     mensagem = body.decode('utf-8')
