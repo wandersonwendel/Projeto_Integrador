@@ -189,7 +189,7 @@ def solicitar_corrida(email, endereco, endereco_destino):
         conn = psycopg2.connect(database="itaxi", user="postgres", password="1234", host="localhost", port="5432")
         cursor = conn.cursor()
 
-         # Verificar se o usuário já está cadastrado
+        # Verificar se o usuário já está cadastrado
         cursor.execute("SELECT * FROM usuarios WHERE email=%s And endereco=%s", (email, endereco,))
         email= cursor.fetchone()
 
@@ -266,6 +266,41 @@ def desvincular_cartao(email, numero_cartao):
 
     except Exception as e:
         print(f"Erro inesperado ao desvincular o cartão: {e}")
+
+def iniciar_corrida(email, mototaxi, corrida_aceita, localizacao_atual, origem, destino):
+    try:
+        # Conectar ao banco de dados
+        conn = psycopg2.connect(database="itaxi", user="postgres", password="1234", host="localhost", port="5432")
+        cursor = conn.cursor()
+
+        # Verificar se o usuário já está cadastrado
+        cursor.execute("SELECT * FROM mototaxistas WHERE email=%s", (email, ))
+        mototaxi = cursor.fetchone()
+
+        if not mototaxi:
+            raise ValueError("Motorista não identificado. Faça o login antes de iniciar a corrida.")
+        
+
+        if not corrida_aceita:
+            raise ValueError("Você precisa aceitar uma corrida antes de iniciar.")
+        if localizacao_atual != origem:
+            raise ValueError("Você não está no local de origem do passageiro.")
+
+        # Lógica para iniciar a corrida
+
+
+        print(f"Iniciando a corrida para o destino {destino}.")
+
+        cursor.close()
+        conn.close()
+
+    except ValueError as e:
+        print(f"Erro ao iniciar a corrida: {e}")
+
+    except Exception as e:
+        print(f"Erro inesperado ao iniciar a corrida: {e}")
+
+
 def callback_cadastrar_passageiro(ch, method, properties, body):
     mensagem = body.decode('utf-8')
     nome, email, telefone, senha, endereco, sexo = mensagem.split(';')
@@ -331,6 +366,16 @@ def callback_desvincular_cartao(ch, method, properties, body):
     except Exception as e:
         print(f"Erro ao processar mensagem: {e}")
 
+def callback_iniciar_corrida(ch, method, properties, body):
+    # Processar a mensagem recebida e extrair os detalhes necessários
+    message = body.decode('utf-8')
+    email, mototaxi, corrida_aceita, localizacao_atual, origem, destino = message.split(';')
+
+    try:
+        desvincular_cartao(email, mototaxi, corrida_aceita, localizacao_atual, origem, destino)
+    except Exception as e:
+        print(f"Erro ao processar mensagem: {e}")
+
 # Conectar ao RabbitMQ
 try:
     connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost', port=5672))
@@ -344,6 +389,7 @@ try:
     channel.queue_declare(queue='fila_autorizar_localizacao')
     channel.queue_declare(queue='fila_vincular_cartao')
     channel.queue_declare(queue='fila_desvincular_cartao')
+    channel.queue_declare(queue='fila_iniciar_corrida')
 
     # Configurar o callback para receber as mensagens
     channel.basic_consume(queue='fila_cadastrar_passageiro', on_message_callback=callback_cadastrar_passageiro, auto_ack=True)
@@ -353,6 +399,7 @@ try:
     channel.basic_consume(queue='fila_autorizar_localizacao', on_message_callback=callback_autorizar_localizacao, auto_ack=True)
     channel.basic_consume(queue='fila_vincular_cartao', on_message_callback=callback_vincular_cartao, auto_ack=True)
     channel.basic_consume(queue='fila_desvincular_cartao', on_message_callback=callback_desvincular_cartao, auto_ack=True)
+    channel.basic_consume(queue='fila_iniciar_corrida', on_message_callback=callback_iniciar_corrida, auto_ack=True)
 
     print('Aguardando mensagens...')
     channel.start_consuming()
