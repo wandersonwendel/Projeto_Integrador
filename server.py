@@ -267,35 +267,35 @@ def desvincular_cartao(email, numero_cartao):
     except Exception as e:
         print(f"Erro inesperado ao desvincular o cartão: {e}")
 
-def iniciar_corrida(email, mototaxi, corrida_aceita, localizacao_atual, origem, destino):
+def iniciar_corrida(local_origem, destino, tempo_estimado):
     try:
-        #Conectar ao Banco de Dados
-        conn = psycopg2.connect(database="itaxi", user="postgres", password="1234", host="localhost", port="5432")
-        cursor = conn.cursor()
+        motorista_logado = True  # Substitua pelo valor real de verificação do motorista logado
+        corrida_aceita = True  # Substitua pelo valor real de verificação de corrida aceita
 
-        # Verificar se o usuário existe no banco de dados
-        cursor.execute("SELECT * FROM usuarios WHERE email=%s", (email,))
-        mototaxi = cursor.fetchone()
+        if motorista_logado and corrida_aceita:
+            if checa_localizacao(local_origem):
+                conn = psycopg2.connect(database="itaxi", user="postgres", password="1234", host="localhost", port="5432")
+                cursor = conn.cursor()
 
-        if not mototaxi:
-            raise ValueError("Motorista não identificado. Faça o login antes de iniciar a corrida.")
-        if not corrida_aceita:
-            raise ValueError("Você precisa aceitar uma corrida antes de iniciar.")
-        if localizacao_atual != origem:
-            raise ValueError("Você não está no local de origem do passageiro.")
+                # Exibir informações no GPS
+                print(f"No GPS: Destino - {destino}, Tempo estimado de viagem: {tempo_estimado}")
 
-        # Lógica para iniciar a corrida
-        print(f"Iniciando a corrida para o destino {destino}.")
-
-        cursor.close()
-        conn.close()
+                cursor.close()
+                conn.close()
 
     except ValueError as e:
-        print(f"Erro ao iniciar a corrida: {e}")
+        print(f"Erro ao iniciar corrida: {e}")
+
+    except psycopg2.Error as e:
+        print(f"Erro ao conectar ao banco de dados: {e}")
 
     except Exception as e:
-        print(f"Erro inesperado ao iniciar a corrida: {e}")
+        print(f"Erro inesperado ao iniciar corrida: {e}")
 
+def checar_localizacao(local_origem):
+    # Lógica para checar se o motorista está no local de origem
+    # Implemente sua lógica aqui. Por exemplo, você pode verificar a localização do motorista através de coordenadas GPS.
+    return True  # Retornando True como exemplo
 
 def excluir_conta(email, senha):
     try:
