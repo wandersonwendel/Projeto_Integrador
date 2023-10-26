@@ -1,7 +1,7 @@
 import pika
 
-def excluir_conta(nome, email, telefone, senha, endereco, sexo):
-    mensagem = f"{nome};{email};{telefone};{senha};{endereco};{sexo}"
+def excluir_conta(email, senha):
+    mensagem = f"{email};{senha}"
 
     # Conectar ao RabbitMQ
     connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost', port=5672)) 
@@ -15,4 +15,4 @@ def excluir_conta(nome, email, telefone, senha, endereco, sexo):
     connection.close()
 
 # Exemplo de uso
-excluir_conta('Wanderson', 'wandersonsousa489@gmail.com', '00972844', 'lllksk', 'ksdhjfuigud', 'senha123')
+excluir_conta('wandersonsousa489@gmail.com', 'lllksk')

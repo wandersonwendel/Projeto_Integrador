@@ -460,7 +460,7 @@ try:
     channel.basic_consume(queue='fila_vincular_cartao', on_message_callback=callback_vincular_cartao, auto_ack=True)
     channel.basic_consume(queue='fila_desvincular_cartao', on_message_callback=callback_desvincular_cartao, auto_ack=True)
     channel.basic_consume(queue='fila_iniciar_corrida', on_message_callback=callback_iniciar_corrida, auto_ack=True)
-    channel.basic_consume(queue='fila_excluir_conta', on_message_callback=callback_iniciar_corrida, auto_ack=True)
+    channel.basic_consume(queue='fila_excluir_conta', on_message_callback=callback_excluir_conta, auto_ack=True)
 
     print('Aguardando mensagens...')
     channel.start_consuming()
