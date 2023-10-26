@@ -56,7 +56,7 @@ def callback(ch, method, properties, body):
     else:
         print("Mensagem desconhecida recebida")
 
-def aguardar_resposta_do_entregador(cliente_id):
+def aguardar_resposta_do_mototaxi(cliente_id):
     connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost', port=5672))
     channel = connection.channel()
 
@@ -92,11 +92,11 @@ if cliente:
     for mototaxi in mototaxis_proximos:
         print(f'ID: {mototaxi["id"]} - Distância: {mototaxi["distancia"]}')
 
-    entregador_escolhido = 1
+    mototaxi_escolhido = 1
 
-    enviar_solicitacao(cliente_id, entregador_escolhido)
+    enviar_solicitacao(cliente_id, mototaxi_escolhido)
 
     # Aguardar resposta do entregador
-    aguardar_resposta_do_entregador(cliente_id)
+    aguardar_resposta_do_mototaxi(cliente_id)
 else:
     print("Email incorreto. Autenticação falhou.")
