@@ -27,7 +27,7 @@ def obter_mototaxis_disponiveis(cliente_x, cliente_y):
 
     return mototaxis_proximos
 
-def callback(ch, method, properties, body):
+def callback_solicitar_corrida(ch, method, properties, body):
     mensagem = body.decode('utf-8')
     partes = mensagem.split(';')
     
@@ -42,7 +42,7 @@ def callback(ch, method, properties, body):
 connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost', port=5672))
 channel = connection.channel()
 channel.queue_declare(queue='fila_solicitacoes_corrida')
-channel.basic_consume(queue='fila_solicitacoes_corrida', on_message_callback=callback, auto_ack=True)
+channel.basic_consume(queue='fila_solicitacoes_corrida', on_message_callback=callback_solicitar_corrida, auto_ack=True)
 
 print('Aguardando mensagens...')
 channel.start_consuming()
