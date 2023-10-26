@@ -80,8 +80,7 @@ def login(email, senha):
     try:
         if not email.strip() or not senha.strip():
             raise ValueError("Campos obrigatórios em falta")
-        
-        # Resto do código de cadastro aqui
+    
         conn = psycopg2.connect(database="itaxi", user="postgres", password="1234", host="localhost", port="5432")
         cursor = conn.cursor()
 
@@ -110,6 +109,9 @@ def login(email, senha):
 
     except Exception as e:
         print(f"Erro inesperado ao validar usuário: {e}")
+
+def logout(email):
+    pass
 
 def autorizar_localizacao(email, aceita_permissao):
     try:
@@ -311,15 +313,9 @@ def excluir_conta(email, senha):
         usuario = cursor.fetchone()
 
         if usuario:
-            # Verificar se a senha corresponde
-            stored_hashed_password = usuario[3]  # Supondo que a senha esteja na terceira coluna da tabela
-            if bcrypt.checkpw(senha.encode('utf-8'), stored_hashed_password):
-                # Excluir a conta do usuário
-                cursor.execute("DELETE FROM usuarios WHERE email=%s", (email,))
-                conn.commit()
-                print(f"Conta do usuário {email} excluída com sucesso!")
-            else:
-                print("Senha incorreta. A conta não foi excluída.")
+            cursor.execute("DELETE FROM usuarios WHERE email=%s", (email,))
+            conn.commit()
+            print(f"Conta do usuário {email} excluída com sucesso!")
         else:
             print("Usuário não encontrado. A conta não foi excluída.")
 
@@ -435,7 +431,10 @@ def callback_excluir_conta(ch, method, properties, body):
         excluir_conta(email, senha)
     except Exception as e:
         print(f"Erro ao processar mensagem de exclusão de conta: {e}")
-        
+
+def callback_logout(ch, method, properties, body):
+    pass
+
 # Conectar ao RabbitMQ
 try:
     connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost', port=5672))
@@ -450,6 +449,7 @@ try:
     channel.queue_declare(queue='fila_vincular_cartao')
     channel.queue_declare(queue='fila_desvincular_cartao')
     channel.queue_declare(queue='fila_iniciar_corrida')
+    channel.queue_declare(queue='fila_excluir_conta')
 
     # Configurar o callback para receber as mensagens
     channel.basic_consume(queue='fila_cadastrar_passageiro', on_message_callback=callback_cadastrar_passageiro, auto_ack=True)
@@ -460,6 +460,7 @@ try:
     channel.basic_consume(queue='fila_vincular_cartao', on_message_callback=callback_vincular_cartao, auto_ack=True)
     channel.basic_consume(queue='fila_desvincular_cartao', on_message_callback=callback_desvincular_cartao, auto_ack=True)
     channel.basic_consume(queue='fila_iniciar_corrida', on_message_callback=callback_iniciar_corrida, auto_ack=True)
+    channel.basic_consume(queue='fila_excluir_conta', on_message_callback=callback_iniciar_corrida, auto_ack=True)
 
     print('Aguardando mensagens...')
     channel.start_consuming()
