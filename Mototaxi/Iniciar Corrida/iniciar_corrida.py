@@ -45,9 +45,7 @@ def aguardar_solicitacao():
     channel = connection.channel()
     
     channel.queue_declare(queue='fila_solicitacao_corrida')
-    channel.queue_declare(queue='fila_encerrar_corrida')
     channel.basic_consume(queue='fila_solicitacao_corrida', on_message_callback=callback_solicitacao_corrida, auto_ack=True)
-    channel.basic_consume(queue='fila_encerrar_corrida', on_message_callback=callback_solicitacao_corrida, auto_ack=True)
 
     print('Aguardando solicitações...')
     channel.start_consuming()
