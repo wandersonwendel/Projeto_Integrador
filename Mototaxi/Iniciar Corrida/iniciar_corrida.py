@@ -12,8 +12,8 @@ def callback_solicitacao_corrida(ch, method, properties, body):
         cliente_id = int(partes[1])
         mototaxi_id = int(partes[2])
 
-        # Simulação: Verificar se o entregador está disponível
-        mototaxi_disponivel = True  # Simulação
+        # Verificar se o mototaxi está disponível
+        mototaxi_disponivel = True  # Simulando que esteja
         if mototaxi_disponivel:
             # Simulação: Perguntar se o entregador aceita a solicitação
             resposta = input("Você aceita a solicitação da corrida? (s/n): ")

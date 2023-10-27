@@ -8,15 +8,19 @@ def obter_mototaxis_disponiveis(cliente_x, cliente_y):
     conn = conectar_banco()
     cursor = conn.cursor()
 
+    # Verificando os mototaxis disponíveis
     cursor.execute("SELECT id, latitude, longitude FROM mototaxis WHERE disponivel = true")
     mototaxis = cursor.fetchall()
 
+    # Lista
     mototaxis_proximos = []
 
     for mototaxi in mototaxis:
         mototaxi_id, mototaxi_x, mototaxi_y = mototaxi
-        distancia = ((cliente_x - mototaxi_x)**2 + (cliente_y - mototaxi_y)**2)**0.5 #  Pitagoras para saber a distância do cliente e do mototaxi
+        #  Pitagoras para saber a distância do cliente e do mototaxi
+        distancia = ((cliente_x - mototaxi_x)**2 + (cliente_y - mototaxi_y)**2)**0.5 
 
+        # Adicionando na lista
         mototaxis_proximos.append({'id': mototaxi_id, 'distancia': distancia})
 
     cursor.close()
@@ -44,7 +48,7 @@ def callback(ch, method, properties, body):
     mensagem = body.decode('utf-8')
     partes = mensagem.split(';')
     
-    if partes[0] == "RESPOSTA":
+    if partes[0] == "RESPOSTA": # Processo do pedido de corrida
         status = partes[1]
         
         if status == "ACEITO":
@@ -70,18 +74,18 @@ def aguardar_resposta_do_mototaxi(cliente_id):
     channel.start_consuming()
 
 # Autenticação do cliente
-email = str(input("Digite o seu Email: "))
+email = str(input("Digite o seu Email: ")) # wandersonsousa489@gmail.com
 
 conn = conectar_banco()
 cursor = conn.cursor()
-cursor.execute("SELECT id FROM usuarios WHERE email = %s", (email,))
+cursor.execute("SELECT id FROM usuarios WHERE email = %s", (email,)) # Buscando usuario no banco
 cliente = cursor.fetchone()
 cursor.close()
 conn.close()
 
 if cliente:
     cliente_id = cliente[0]
-    print(f"Cliente autenticado! ID: {cliente_id}")
+    print(f"Cliente autenticado! ID: {cliente_id}") # Verificou que aquele e-mail está no banco
 
     cliente_x = 10  # Exemplo de coordenada x do cliente
     cliente_y = 5   # Exemplo de coordenada y do cliente
@@ -90,7 +94,7 @@ if cliente:
 
     print("Mototaxis próximos:")
     for mototaxi in mototaxis_proximos:
-        print(f'ID: {mototaxi["id"]} - Distância: {mototaxi["distancia"]}')
+        print(f'ID: {mototaxi["id"]} - Distância: {mototaxi["distancia"]}') 
 
     mototaxi_escolhido = 1
 
