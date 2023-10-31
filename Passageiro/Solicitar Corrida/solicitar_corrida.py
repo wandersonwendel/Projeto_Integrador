@@ -70,7 +70,7 @@ def aguardar_resposta_do_mototaxi(cliente_id):
     channel.start_consuming()
 
 # Autenticação do cliente
-email = str(input("Digite o seu Email: "))
+email = str(input("Digite o seu Email: ")) 
 
 conn = conectar_banco()
 cursor = conn.cursor()
