@@ -12,8 +12,8 @@ def callback_solicitacao_corrida(ch, method, properties, body):
         cliente_id = int(partes[1])
         mototaxi_id = int(partes[2])
 
-        # Simulação: Verificar se o entregador está disponível
-        mototaxi_disponivel = True  # Simulação
+        # Verificar se o mototaxi está disponível
+        mototaxi_disponivel = True  # Simulando que esteja
         if mototaxi_disponivel:
             # Simulação: Perguntar se o entregador aceita a solicitação
             resposta = input("Você aceita a solicitação da corrida? (s/n): ")
@@ -45,9 +45,7 @@ def aguardar_solicitacao():
     channel = connection.channel()
     
     channel.queue_declare(queue='fila_solicitacao_corrida')
-    channel.queue_declare(queue='fila_encerrar_corrida')
     channel.basic_consume(queue='fila_solicitacao_corrida', on_message_callback=callback_solicitacao_corrida, auto_ack=True)
-    channel.basic_consume(queue='fila_encerrar_corrida', on_message_callback=callback_solicitacao_corrida, auto_ack=True)
 
     print('Aguardando solicitações...')
     channel.start_consuming()
