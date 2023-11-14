@@ -40,24 +40,22 @@ def cadastrar_passageiro(nome, email, telefone, senha, endereco, sexo):
     except Exception as e:
         print(f"Erro inesperado ao cadastrar usuário: {e}")
 
-def cadastrar_mototaxi(nome, email, telefone, senha, endereco, sexo):
+def cadastrar_mototaxi(email, disponivel, latitude, longitude):
     # Conectar ao banco de dados  
     try:
-        if not nome.strip() or not email.strip() or not telefone.strip() or not senha.strip():
-            raise ValueError("Campos obrigatórios em falta")
         
         # Conectar ao banco de dados
         conn = psycopg2.connect(database="itaxi", user="postgres", password="1234", host="localhost", port="5432")
         cursor = conn.cursor()
 
          # Verificar se o usuário já está cadastrado
-        cursor.execute("SELECT * FROM mototaxistas WHERE email=%s", (email,))
+        cursor.execute("SELECT * FROM mototaxis WHERE email=%s", (email,))
         mototaxi = cursor.fetchone()
 
         if mototaxi is None:
             # Inserir novo usuário no banco de dados
-            cursor.execute("INSERT INTO mototaxistas (nome, email, telefone, senha, endereco, sexo) VALUES (%s, %s, %s, %s, %s, %s)",
-                           (nome, email, telefone, senha, endereco, sexo))
+            cursor.execute("INSERT INTO mototaxistas (email, disponivel, latitude, longitude) VALUES (%s, %s, %s, %s)",
+                           (email, disponivel, latitude, longitude))
             conn.commit()
             
             print(f"Mototaxi {email} cadastrado com sucesso!")
@@ -275,7 +273,7 @@ def iniciar_corrida(local_origem, destino, tempo_estimado):
         corrida_aceita = True  # Substitua pelo valor real de verificação de corrida aceita
 
         if motorista_logado and corrida_aceita:
-            if checa_localizacao(local_origem):
+            if (local_origem):
                 conn = psycopg2.connect(database="itaxi", user="postgres", password="1234", host="localhost", port="5432")
                 cursor = conn.cursor()
 
@@ -293,11 +291,6 @@ def iniciar_corrida(local_origem, destino, tempo_estimado):
 
     except Exception as e:
         print(f"Erro inesperado ao iniciar corrida: {e}")
-
-def checar_localizacao(local_origem):
-    # Lógica para checar se o motorista está no local de origem
-    # Implemente sua lógica aqui. Por exemplo, você pode verificar a localização do motorista através de coordenadas GPS.
-    return True  # Retornando True como exemplo
 
 def excluir_conta(email, senha):
     try:
@@ -338,6 +331,15 @@ def callback_cadastrar_passageiro(ch, method, properties, body):
 
     try:
         cadastrar_passageiro(nome, email, telefone, senha, endereco, sexo)
+    except Exception as e:
+        print(f"Erro ao processar mensagem: {e}")
+
+def callback_cadastrar_mototaxi(ch, method, properties, body):
+    mensagem = body.decode('utf-8')
+    email, disponivel, latitude, longitude = mensagem.split(';')
+
+    try:
+        cadastrar_mototaxi(email, disponivel, latitude, longitude)
     except Exception as e:
         print(f"Erro ao processar mensagem: {e}")
 
@@ -399,9 +401,9 @@ def callback_desvincular_cartao(ch, method, properties, body):
 def callback_iniciar_corrida(ch, method, properties, body):
     # Processar a mensagem recebida e extrair os detalhes necessários
     message = body.decode('utf-8')
-    dados = message.split(';')
+    partes = message.split(';')
 
-    if dados[0] == "SOLICITACAO":
+    if partes[0] == "SOLICITACAO":
         cliente_id = int(partes[1])
         entregador_id = int(partes[2])
 
@@ -411,9 +413,9 @@ def callback_iniciar_corrida(ch, method, properties, body):
             # Simulação: Perguntar se o entregador aceita a solicitação
             resposta = input("Você aceita a solicitação de entrega? (s/n): ")
             if resposta.lower() == 's':
-                enviar_resposta_para_cliente(cliente_id, "ACEITO")
+                iniciar_corrida.enviar_resposta_para_cliente(cliente_id, "ACEITO")
             else:
-                enviar_resposta_para_cliente(cliente_id, "RECUSADO")
+                iniciar_corrida.enviar_resposta_para_cliente(cliente_id, "RECUSADO")
         else:
             print("Não há entregadores disponíveis no momento.")
 
