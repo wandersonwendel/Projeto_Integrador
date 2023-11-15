@@ -9,7 +9,7 @@ def callback_solicitacao_corrida(ch, method, properties, body):
     partes = mensagem.split(';')
     
     if partes[0] == "SOLICITACAO":
-        cliente_id = int(partes[1])
+        passageiro_id = int(partes[1])
         mototaxi_id = int(partes[2])
 
         # Verificar se o mototaxi está disponível
@@ -18,20 +18,20 @@ def callback_solicitacao_corrida(ch, method, properties, body):
             # Simulação: Perguntar se o entregador aceita a solicitação
             resposta = input("Você aceita a solicitação da corrida? (s/n): ")
             if resposta.lower() == 's':
-                enviar_resposta_para_cliente(cliente_id, "ACEITO")
+                enviar_resposta_para_passageiro(passageiro_id, "ACEITO")
             else:
-                enviar_resposta_para_cliente(cliente_id, "RECUSADO")
+                enviar_resposta_para_passageiro(passageiro_id, "RECUSADO")
         else:
             print("Não há mototaxis disponíveis no momento.")
 
-def enviar_resposta_para_cliente(cliente_id, status):
-    mensagem = f"RESPOSTA;{status};{cliente_id}"
+def enviar_resposta_para_passageiro(passageiro_id, status):
+    mensagem = f"RESPOSTA;{status};{passageiro_id}"
 
     try:
         connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost', port=5672))
         channel = connection.channel()
 
-        channel.basic_publish(exchange='', routing_key=f'fila_respostas_{cliente_id}', body=mensagem)
+        channel.basic_publish(exchange='', routing_key=f'fila_respostas_{passageiro_id}', body=mensagem)
 
         print(f'Resposta de corrida enviada: {mensagem}')
 
