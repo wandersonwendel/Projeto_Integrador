@@ -111,7 +111,30 @@ def login(email, senha):
         print(f"Erro inesperado ao validar usuário: {e}")
 
 def logout(email):
-    pass
+    try:
+        # Verificar se o usuário está em uma corrida ativa
+        conn = psycopg2.connect(database="itaxi", user="postgres", password="1234", host="localhost", port="5432")
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT * FROM corridas WHERE usuario_email=%s AND status='ativa'", (email,))
+        corrida = cursor.fetchone()
+
+        if corrida:
+            print("Você não pode fazer o logout durante uma corrida ativa. Conclua ou cancele a corrida primeiro.")
+            return False
+        else:
+            print("Logout bem-sucedido. Você foi desconectado do aplicativo ITAxi.")
+            # Lógica para encerrar a sessão do usuário aqui.
+            return True
+
+        cursor.close()
+        conn.close()
+    except psycopg2.Error as e:
+        print(f"Erro ao conectar ao banco de dados: {e}")
+        return False
+    except Exception as e:
+        print(f"Erro inesperado ao fazer o logout: {e}")
+        return False
 
 def autorizar_localizacao(email, aceita_permissao):
     try:
@@ -275,7 +298,7 @@ def iniciar_corrida(local_origem, destino, tempo_estimado):
         corrida_aceita = True  # Substitua pelo valor real de verificação de corrida aceita
 
         if motorista_logado and corrida_aceita:
-            if checa_localizacao(local_origem):
+            if checar_localizacao(local_origem):
                 conn = psycopg2.connect(database="itaxi", user="postgres", password="1234", host="localhost", port="5432")
                 cursor = conn.cursor()
 
@@ -432,8 +455,20 @@ def callback_excluir_conta(ch, method, properties, body):
     except Exception as e:
         print(f"Erro ao processar mensagem de exclusão de conta: {e}")
 
-def callback_logout(ch, method, properties, body):
-    pass
+def callback_logout_passageiro(ch, method, properties, body):
+    mensagem = body.decode('utf-8')
+    email = mensagem
+
+    try:
+        if logout(email):
+            # Lógica para redirecionar o usuário para a tela de login inicial após o logout
+            print("Redirecionando para a tela de login...")
+        else:
+            # Lógica para informar ao usuário que o logout não foi concluído com sucesso
+            print("Logout não concluído com sucesso. Permanecendo conectado ao aplicativo.")
+
+    except Exception as e:
+        print(f"Erro ao processar mensagem de logout: {e}")
 
 # Conectar ao RabbitMQ
 try:
@@ -444,6 +479,7 @@ try:
     channel.queue_declare(queue='fila_cadastrar_passageiro')
     channel.queue_declare(queue='fila_cadastro_veiculo')
     channel.queue_declare(queue='fila_login')
+    channel.queue_declare(queue='fila_logout_passageiro')
     channel.queue_declare(queue='fila_solicitar_corrida')
     channel.queue_declare(queue='fila_autorizar_localizacao')
     channel.queue_declare(queue='fila_vincular_cartao')
@@ -455,6 +491,7 @@ try:
     channel.basic_consume(queue='fila_cadastrar_passageiro', on_message_callback=callback_cadastrar_passageiro, auto_ack=True)
     channel.basic_consume(queue='fila_cadastro_veiculo', on_message_callback=callback_cadastrar_veiculo, auto_ack=True)
     channel.basic_consume(queue='fila_login', on_message_callback=callback_login, auto_ack=True)
+    channel.basic_consume(queue='fila_logout_passageiro', on_message_callback=callback_logout_passageiro, auto_ack=True)
     channel.basic_consume(queue='fila_solicitar_corrida', on_message_callback=callback_solicitar_corrida, auto_ack=True)
     channel.basic_consume(queue='fila_autorizar_localizacao', on_message_callback=callback_autorizar_localizacao, auto_ack=True)
     channel.basic_consume(queue='fila_vincular_cartao', on_message_callback=callback_vincular_cartao, auto_ack=True)
