@@ -1,18 +1,18 @@
 import pika
 
-def cadastrar_usuario(nome, email, telefone, senha, endereco, sexo):
-    mensagem = f"{nome};{email};{telefone};{senha};{endereco};{sexo}"
+def cadastrar_mototaxi(email, disponivel, latitude, longitude):
+    mensagem = f"{email};{disponivel};{latitude};{longitude}"
 
     # Conectar ao RabbitMQ
     connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost', port=5672)) 
     channel = connection.channel() 
 
     # Publicar a mensagem na fila
-    channel.basic_publish(exchange='', routing_key='fila_cadastrar_passageiro', body=mensagem)
+    channel.basic_publish(exchange='', routing_key='fila_cadastrar_mototaxi', body=mensagem)
 
     print(f'Mensagem enviada: {mensagem}')
 
     connection.close()
 
 # Exemplo de uso
-cadastrar_usuario('Wanderson', 'wandersonsousa489@gmail.com', '00972844', 'lllksk', 'ksdhjfuigud', 'senha123')
+cadastrar_mototaxi('wandersonsousa489@gmail.com', True , '5', '10')

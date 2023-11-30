@@ -16,7 +16,7 @@ def callback_solicitacao_corrida(ch, method, properties, body):
         mototaxi_disponivel = True  # Simulando que esteja
         if mototaxi_disponivel:
             # Simulação: Perguntar se o entregador aceita a solicitação
-            resposta = input("Você aceita a solicitação da corrida? (s/n): ")
+            resposta = input("\nVocê aceita a solicitação da corrida? (s/n): ")
             if resposta.lower() == 's':
                 enviar_resposta_para_cliente(cliente_id, "ACEITO")
             else:
@@ -33,7 +33,7 @@ def enviar_resposta_para_cliente(cliente_id, status):
 
         channel.basic_publish(exchange='', routing_key=f'fila_respostas_{cliente_id}', body=mensagem)
 
-        print(f'Resposta de corrida enviada: {mensagem}')
+        print(f'\nResposta de corrida enviada: {mensagem}')
 
         connection.close()
 
@@ -47,7 +47,7 @@ def aguardar_solicitacao():
     channel.queue_declare(queue='fila_solicitacao_corrida')
     channel.basic_consume(queue='fila_solicitacao_corrida', on_message_callback=callback_solicitacao_corrida, auto_ack=True)
 
-    print('Aguardando solicitações...')
+    print('\nAguardando solicitações...')
     channel.start_consuming()
 
 # Exemplo de uso

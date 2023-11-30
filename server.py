@@ -54,7 +54,7 @@ def cadastrar_mototaxi(email, disponivel, latitude, longitude):
 
         if mototaxi is None:
             # Inserir novo usuário no banco de dados
-            cursor.execute("INSERT INTO mototaxistas (email, disponivel, latitude, longitude) VALUES (%s, %s, %s, %s)",
+            cursor.execute("INSERT INTO mototaxis (email, disponivel, latitude, longitude) VALUES (%s, %s, %s, %s)",
                            (email, disponivel, latitude, longitude))
             conn.commit()
             
@@ -269,8 +269,8 @@ def desvincular_cartao(email, numero_cartao):
 
 def iniciar_corrida(local_origem, destino, tempo_estimado):
     try:
-        motorista_logado = True  # Substitua pelo valor real de verificação do motorista logado
-        corrida_aceita = True  # Substitua pelo valor real de verificação de corrida aceita
+        motorista_logado = True  
+        corrida_aceita = True  
 
         if motorista_logado and corrida_aceita:
             if (local_origem):
@@ -444,6 +444,7 @@ try:
 
     # Definir as filas a serem consumidas
     channel.queue_declare(queue='fila_cadastrar_passageiro')
+    channel.queue_declare(queue='fila_cadastrar_mototaxi')
     channel.queue_declare(queue='fila_cadastro_veiculo')
     channel.queue_declare(queue='fila_login')
     channel.queue_declare(queue='fila_solicitar_corrida')
@@ -455,6 +456,7 @@ try:
 
     # Configurar o callback para receber as mensagens
     channel.basic_consume(queue='fila_cadastrar_passageiro', on_message_callback=callback_cadastrar_passageiro, auto_ack=True)
+    channel.basic_consume(queue='fila_cadastrar_mototaxi', on_message_callback=callback_cadastrar_mototaxi, auto_ack=True)
     channel.basic_consume(queue='fila_cadastro_veiculo', on_message_callback=callback_cadastrar_veiculo, auto_ack=True)
     channel.basic_consume(queue='fila_login', on_message_callback=callback_login, auto_ack=True)
     channel.basic_consume(queue='fila_solicitar_corrida', on_message_callback=callback_solicitar_corrida, auto_ack=True)
