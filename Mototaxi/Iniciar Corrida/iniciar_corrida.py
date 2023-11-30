@@ -33,7 +33,7 @@ def enviar_resposta_para_cliente(cliente_id, status):
 
         channel.basic_publish(exchange='', routing_key=f'fila_respostas_{cliente_id}', body=mensagem)
 
-        print(f'\nResposta de corrida enviada: {mensagem}')
+        print(f'\nResposta de corrida enviada: {mensagem}') 
 
         connection.close()
 
